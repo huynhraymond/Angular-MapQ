@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="../bower_components/angular/angular.js"></script>
+    <script>
+        angular.module('myApp', []).controller('myController', function($scope, Github) {
+            /*
+             Github.search('nodejs').success(function(data) {
+             console.log(data);
+             });     */
+            Github.search('nodejs').then(function(obj) {
+                        console.log(obj);
+                    },
+                    function() {
+                        console.log('Wrong');
+                    });
+        }).factory('Github', function($http, $q){
+            // return promise object
+            return {
+                // $q -> promise
+                search: function (term) {
+                    return $q(function (resolve, reject) {
+                        $http.get('https://api.github.com/search/repositories?q=' + term).success(function (data) {
+                            data.id = 'asdfasd-a452as4df53as1df';
+                            resolve(data);
+
+                        }).error(function () {
+                            reject();
+                        });
+                    });
+                }
+            }
+        })
+    </script>
+</head>
+<body>
+<div ng-controller="myController">
+    {{message}}
+</div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <style>
+        *{
+            margin:0px;
+            padding:0px;
+        }
+        html, body, #map-canvas {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+        window.addEventListener('load', function(){
+            var map;
+            function initialize(lat, long) {
+                var mapOptions = {
+                    zoom: 17,
+                    center: new google.maps.LatLng(lat, long)
+                };
+                map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+                var myLatLng = new google.maps.LatLng(lat, long); //"Justin Herman Plaza");
+                var marker=  new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    title: 'Testing!'
+                });
+                var infowindow = new google.maps.InfoWindow({ maxWidth:300 });
+                infowindow.setContent('Chris');
+                infowindow.open(map, marker);
+            }
+
+            window.navigator.geolocation.getCurrentPosition(function(obj){
+                console.log(obj);
+                initialize(obj.coords.latitude, obj.coords.longitude);
+
+            }, function(){});
+
+
+        });
+    </script>
+
+
+</head>
+<body>
+<div id = 'map-canvas'> </div>
+</body>
+</html>

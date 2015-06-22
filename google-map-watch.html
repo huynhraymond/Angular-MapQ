@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html ng-app="googleMapApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        [data-googlemap] {
+            height: 75vh;
+        }
+    </style>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="google-map-watch.js"></script>
+
+</head>
+<body ng-controller="googleMapController">
+<div data-googlemap></div>
+    <input type="text" placeholder="san jose, us" ng-model="mapcity" ng-keydown="getCity($event)">
+    <label>Search: {{mapcity}}</label>
+</body>
+</html>

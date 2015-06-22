@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="bower_components/angular/angular.js"></script>
+    <script>
+        angular.module('myApp', []).controller('MyController', function ($scope) {
+            $scope.message = 'Hello';
+        }).directive('hwdirective', function () {
+            // returns a directive definition object
+            return  {
+                restrict: 'A',
+                template: '<div>Hello World Directive <div>{{message}}</div></div>',
+                link: function (scope, element, attributes) {
+                    console.log(element[0]);
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+
+<div hwdirective></div>
+<div ng-controller="MyController">
+
+    <div hwdirective></div>
+
+</div>
+</body>
+</html>
+
+

@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        [data-googlemap] {
+            height: 75vh;
+        }
+    </style>
+    <script src="bower_components/angular/angular.js"></script>
+    <script>
+        angular.module('myApp', []).controller('myController', function($scope) {
+            $scope.mapcity = '';
+            $scope.mapwhatchcity = '';
+
+            $scope.getMapQuery = function(event) {
+                if ( event.keyCode === 13 ) {
+                    $scope.mapwatchcity = $scope.mapcity;
+                }
+            }
+
+        }).directive('googlemap', function($http, $q) {
+            var map;
+            return {
+                restrict: 'A',
+                // This stage - no scope is ready
+                compile: function(element, attrs) {
+
+                    var google_script_deferred = $q.defer();
+
+                    // download the googlemaps script and load it
+                    function loadScript(url) {
+                        var script = document.createElement('script');
+                        script.src = url;
+                        document.head.appendChild(script);
+                    }
+
+                    function loadMap() {
+                        map = new google.maps.Map(element[0], {
+                            zoom: 16,
+                            center: new google.maps.LatLng(42.98,-81.23)
+                        });
+                    }
+
+                    function loadCityMap(city) {
+                        var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + encodeURIComponent(city);
+                        $http.get(url).success(function(data) {
+
+                            var coords = data.coord;
+
+                            var title = city + '\nWeather: ' + data.weather[0].main;
+
+                            var city_lat_lng = new google.maps.LatLng(coords.lat, coords.lon);
+                            new google.maps.Marker({
+                                position: city_lat_lng,
+                                map: map,
+                                title: title
+                            });
+
+                            map.setCenter(city_lat_lng);
+
+                        }).error(function() {
+
+                        });
+                    }
+
+                    // callback() must be global
+                    window.initGoogleMapDirective = function() {
+                        loadMap();
+                        google_script_deferred.resolve();
+                    };
+
+                    loadScript("https://maps.googleapis.com/maps/api/js?v=3.exp&callback=initGoogleMapDirective");
+
+                    return {
+                        pre: function() {},
+                        post: function(scope, element, attrs) {
+
+                            $q.all([google_script_deferred.promise]).then(function(result) {});
+
+                            scope.$watch('mapwatchcity', function() {
+                                if ( scope.mapwatchcity !== undefined ) {
+                                    //console.log(scope.mapwatchcity);
+                                    loadCityMap(scope.mapwatchcity);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</head>
+<body ng-controller="myController">
+<div data-googlemap></div>
+<input type="text" placeholder="san jose, us" ng-keydown="getMapQuery($event)" ng-model="mapcity"/>
+</body>
+</html>

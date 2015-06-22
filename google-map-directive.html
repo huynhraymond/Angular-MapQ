@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        [data-googlemap] {
+            height: 50vh;
+        }
+    </style>
+    <script src="bower_components/angular/angular.js"></script>
+    <script>
+        angular.module('myApp', []).directive('googlemap', function($http, $q) {
+            var map;
+            return {
+                restrict: 'A',
+                // This stage - no scope is ready
+                compile: function(element, attrs) {
+
+                    var google_script_deferred = $q.defer();
+
+                    // download the googlemaps script and load it
+                    function loadScript(url) {
+                        var script = document.createElement('script');
+                        script.src = url;
+                        document.head.appendChild(script);
+                    }
+
+                    function loadMap() {
+                        map = new google.maps.Map(element[0], {
+                            zoom: 16,
+                            center: new google.maps.LatLng(22,104)
+                        });
+                    }
+
+                    // callback() must be global
+                    window.initGoogleMapDirective = function() {
+                        loadMap();
+                        google_script_deferred.resolve();
+                    };
+
+                    loadScript("https://maps.googleapis.com/maps/api/js?v=3.exp&callback=initGoogleMapDirective");
+
+                    return {
+                        pre: function() {},
+                        post: function(scope, element, attrs) {
+                            var data_deferred = $q.defer();
+
+                            var city_name = 'san francisco';
+                            $http.get('http://api.openweathermap.org/data/2.5/weather?q=' + encodeURIComponent(city_name))
+                                    .success(function (data) {
+                                        data_deferred.resolve(data);
+
+                                    }).error(function () {
+                                        data_deferred.reject();
+                                    });
+
+                            $q.all([google_script_deferred.promise, data_deferred.promise]).then(function(result) {
+                                console.log(result);
+
+                                var coords = result[1].coord;
+                                var city_lat_lng = new google.maps.LatLng(coords.lat, coords.lon);
+
+                                var marker = new google.maps.Marker({
+                                    position: city_lat_lng,
+                                    map: map,
+                                    title: city_name
+                                });
+
+                                map.setCenter(city_lat_lng);
+                            })
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <div data-googlemap></div>
+</body>
+</html>

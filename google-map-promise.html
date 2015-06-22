@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        html, body {
+            height: 100%;
+        }
+    </style>
+
+    <script>
+        window.init = function () {
+            console.log('Callback must be global');
+        };
+
+        function createLoadPromise() {
+            return new Promise( function(resolve, reject) {
+                window.addEventListener('load', function() {
+                    resolve();
+                });
+
+                window.addEventListener('error', function() {
+                    reject();
+                });
+            });
+        }
+
+        function createNavigatorPromise() {
+            return new Promise( function(resolve, reject) {
+                window.navigator.geolocation.getCurrentPosition(function(obj) {
+                    resolve(obj);
+                }, function() {
+                    reject();
+                });
+            });
+        }
+
+        Promise.all([createLoadPromise(), createNavigatorPromise()]).then(function (data){
+            console.log(data);
+            // because the promise results are mapped to the promises, to get to the
+            // coords, we need to target the results of the second promise
+            // hence the data[1]
+            var coords = data[1].coords;
+            var city_lat_lng = new google.maps.LatLng(coords.latitude, coords.longitude);
+            // loading the google map goes here ...
+            var map = new google.maps.Map(document.body, {
+                zoom: 16,
+                center: city_lat_lng
+                //center: new google.maps.LatLng(coords.latitude, coords.longitude)
+            });
+
+            var marker = new google.maps.Marker( {
+                position: city_lat_lng,
+                map: map,
+                title: 'Raymond'
+            });
+
+            var infoWindow = new google.maps.InfoWindow( {
+                content: 'Raymond',
+                maxWidth: 200
+            });
+
+            infoWindow.open(map, marker);
+
+            /*
+            var infoWindow = new google.maps.InfoWdindow({maxWidth:300});
+            infoWindow.setContent('Raymond');
+            infoWindow.open(map, marker);  */
+
+            //map.setCenter(city_lat_lng);
+        });
+
+    </script>
+</head>
+<body>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&callback=init"></script>
+</body>
+</html>
